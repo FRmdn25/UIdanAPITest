@@ -1,0 +1,36 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x gradlew
+
+      - name: Run API tests with Gradle
+        run: ./gradlew clean test --tests "*APITest*"
+
+      - name: Generate Cucumber HTML Report
+        run: ./gradlew generateCucumberReport
+
+      - name: Upload API report as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-cucumber-html-report
+          path: build/cucumber-html-report 

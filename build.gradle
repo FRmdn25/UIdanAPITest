@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.fachri'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Cucumber
+    testImplementation 'io.cucumber:cucumber-java:7.14.0'
+    testImplementation 'io.cucumber:cucumber-junit:7.14.0'
+
+    // Selenium yang kompatibel dengan Java 8 → versi 3.141.59
+    testImplementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
+
+    // RestAssured
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+
+    // JUnit
+    testImplementation 'junit:junit:4.13.2'
+
+    // Guava & WebDriverManager
+    testImplementation 'com.google.guava:guava:30.1.1-jre'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
+
+    // Report Generator
+    testImplementation 'net.masterthought:cucumber-reporting:5.7.4'
+}
+
+test {
+    useJUnit()
+
+    // Output JSON dari Cucumber
+    systemProperty "cucumber.plugin", "json:build/cucumber-report/cucumber.json"
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// ✅ Register task untuk generate laporan HTML dari cucumber.json
+tasks.register('generateCucumberReport', JavaExec) {
+    dependsOn test
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'ReportGenerator'
+
+    args = [
+            'build/cucumber-report/cucumber.json',
+            '--output', 'build/cucumber-html-report',
+            '--report-name', 'SauceDemo Test Report'
+    ]
+}
